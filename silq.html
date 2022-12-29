@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Introduction to Quantum Programming Languages</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="css/style.css" />
+  
+  <script defer="" src="katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="katex/katex.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Introduction to Quantum Programming Languages</h1>
+</header>
+<h1 id="silq">SILQ</h1>
+<h3 id="overview">Overview</h3>
+<p>SILQ is a high-level quantum programming language developed by
+researchers at ETH Zurich. While it is bears some similarity to <a
+href="qsharp.html">Q#</a>, it has a number of features that sets it
+apart, such as</p>
+<ul>
+<li>a sophisticated type system with, among other things, type-level
+distinction between classical and quantum types (using <code>!</code>),
+classical and quantum subroutines (using the <code>qfree</code>
+annotation), and quantum subroutines with and without measurement (using
+the <code>mfree</code> annotation); and</li>
+<li>automatic uncomputation of subroutines, preventing accidental
+measurement when variables leave scope.</li>
+</ul>
+<p>SILQ programs also support using various unicode symbols, though they
+all have ASCII alternatives and so are not strictly necessary. In this
+tutorial, we will avoid their use.</p>
+<p>SILQ programs operate much like Q# programs in that they are allowed
+to mix classical and quantum computations, perform measurements at
+arbitrary places and branch on the result, and so forth. Unlike
+circuits, which are run directly on a quantum computer, we can think of
+SILQ programs instead as programs running on a classical computer
+<em>controlling</em> a quantum computer: this classical computer is able
+to continuously send quantum instructions, as well as the initial
+classical data to perform these on, to the quantum computer, and receive
+measurements back once the instructions have been executed. This is
+known as the <em>QRAM model</em> of quantum computation.</p>
+<p>SILQ is most easily installed as a Visual Studio Code plugin, as
+described in the <a href="https://silq.ethz.ch/install">installation
+instructions</a>, though brave souls can also install it from <a
+href="https://github.com/eth-sri/silq">source</a>.</p>
+<h3 id="tutorial">Tutorial</h3>
+<p>Like most other programming languages, a SILQ program consists of a
+number of function definitions. A SILQ program is runnable if it
+contains a <code>main</code> function. The simplest possible SILQ
+program is something like</p>
+<pre><code>def main() {
+  return false;
+}</code></pre>
+<p>To run this program in Visual Studio Code, save it and press F5 (it
+should return 0).</p>
+<p>SILQ supports a number of types and annotations to aid in
+programming. The simplest types are the primitive types such as
+<code>B</code> (Booleans), <code>N</code> (natural numbers),
+<code>Z</code> (integers), <code>int[n]</code> and <code>uint[n]</code>
+(<span class="math inline">n</span>-bit signed and unsigned integers),
+and so on.</p>
+<p>Given some types <code>s</code> and <code>t</code>, we can also form
+complex types such as <code>s -&gt; t</code> (functions taking inputs of
+type <code>s</code> and producing outputs of type <code>t</code>),
+<code>s[]</code> (lists of elements of type <code>s</code>),
+<code>s^n</code> (for some natural number <code>n</code>; <span
+class="math inline">n</span>-ary tuples of type <code>s</code>), and
+<code>!s</code> (the type <code>s</code> restricted to classical
+values).</p>
+<p>While most of these should be self-explanatory, the classical types
+<code>!t</code> require some further exposition. A value of type
+<code>!t</code> is a value of type <code>t</code> which is guaranteed to
+be classical, i.e., not in a superposition of states. Distinguishing
+between classical and quantum values is useful, since we can do more
+with classical values than quantum ones. For example, classical values
+can be thrown away and duplicated, but quantum ones cannot, e.g., the
+function</p>
+<pre><code>def discard (n : !N) {
+  return true;
+}</code></pre>
+<p>is well-typed (since it is defined only on classical natural
+numbers), while the function</p>
+<pre><code> def discardQuantum (n : N) {
+   return true;
+ }</code></pre>
+<p>is not (as it would try to discard arbitrary quantum natural numbers,
+which is not possible without first measuring). The type of the built-in
+measurement function <code>measure</code> also reflects this distinction
+between classical and quantum values, in that it has type
+<code>t -&gt; !t</code> (for every type <code>t</code>).</p>
+<p>It can also be useful to distinguish between functions that measure
+(parts of) their input, and functions which do not. A function that does
+not measure any (parts of) its arguments can be annotated with the
+<code>mfree</code> annotation, and so will not just have type
+<code>s -&gt; t</code> but in fact <code>s -&gt; mfree t</code>.
+Requiring that an argument function has an <code>mfree</code>-type can
+be used to ensure that a superposed quantum state can be safely handed
+off to this function without worry that the state is destroyed by a
+potential measurement.</p>
+<p>A similar annotation is the <code>qfree</code> annotation: a function
+of type <code>s -&gt; qfree t</code> is not just a function from
+<code>s</code> to <code>t</code>, but one which neither introduces nor
+eliminates superpositions. In other words, a <code>qfree</code> function
+is a classical function which can be applied to a quantum state without
+worry of introducing or eliminating terms in a superposed state. This is
+very useful for describing <em>oracles</em> (which are the heart of
+algorithms such as Grover search, Deutsch-Jozsa, and many others), as
+these are entirely classical functions (and, indeed, these algorithms
+only function correctly when they are).</p>
+<p>A final very useful type-level feature of SILQ is generic parameters.
+A generic parameter is a classical value known at compile-time, on which
+a function definition may depend. This can be useful for defining
+families of function which are flexible in that they can be defined
+generically for one or more external parameters. For example, one would
+expect an algorithm for adding <span class="math inline">n</span>-qubit
+quantum integers to work the same for any choice of <span
+class="math inline">n</span>, and so such an algorithm should be
+<em>generic</em> in <span class="math inline">n</span>. Generic
+parameters generalise the <em>uniform families</em> found in <a
+href="quipper.html">Quipper</a>. While normal arguments are given in
+parentheses, generic parameters are given in square brackets. For
+example, the function</p>
+<pre><code>def bitwise_not [n:!N] (bits : B^n) qfree {
+  for i in [0..n) {
+    bits[i] := X(bits[i]);
+  }
+  return bits;
+}</code></pre>
+<p>takes a generic parameter <code>n</code> of type <code>!N</code>
+(classical natural numbers), and can be applied to a vector of Booleans
+of any length (since the input argument <code>bits</code> is of type
+<code>B^n</code>, which depends on the generic parameter
+<code>n</code>). Whatever the value of the <code>n</code> is, this
+function loops through the vector and applies the <span
+class="math inline">X</span> gate (or <span
+class="math inline">\mathit{NOT}</span> gate) to each entry. This allows
+us to apply this same function to vectors of different length, e.g.,
+with the definition of <code>bitwise_not</code> above,</p>
+<pre><code>def main() {
+  xs := bitwise_not(false, false, true);
+  ys := bitwise_not(true, true);
+  return (xs,ys);
+}</code></pre>
+<p>is not only well-typed, it also returns <code>((1,1,0),(0,0))</code>
+when run as expected.</p>
+<p>Note also that <code>bitwise_not</code> can be given the
+<code>qfree</code> annotation since all it ever does is apply <span
+class="math inline">X</span> to each qubit in the vector, and <span
+class="math inline">X</span> neither introduces nor eliminates
+superpositions. If we were to change this to apply an arbitrary function
+<code>B -&gt; B</code> to each entry in the vector, e.g.,</p>
+<pre><code>def bitwise_map [n:!N] (bits : B^n, f : !(B -&gt; B)) {
+  for i in [0..n) {
+    bits[i] := f(bits[i]);
+  }
+  return bits;
+}</code></pre>
+<p>we would have to give up the <code>qfree</code> annotation, as we can
+not guarantee that <code>f</code> does not introduce or eliminate
+superpositions. For example,</p>
+<pre><code>def main() {
+  xs := bitwise_map((false, true), H);
+  return xs;
+}</code></pre>
+<p>is well-typed (<code>H</code> is the built-in <em>Hadamard</em>
+gate), and running it returns the state <span
+class="math inline">\frac{1}{2}(\ket{00} + \ket{10} - \ket{01} -
+\ket{11})</span>, showing that the SILQ type system was justified in
+refusing to award <code>bitwise_map</code> the <code>qfree</code>
+annotation.</p>
+<p>More information about SILQ (including a complete list of types,
+annotations, and other features) can be found in the <a
+href="https://silq.ethz.ch/documentation">official
+documentation</a>.</p>
+<h3 id="deutsch-jozsa">Deutsch-Jozsa</h3>
+<p>An implementation of Deutsch-Jozsa is found below.</p>
+<pre><code>def DeutschJozsa[n:!N](const f : B^n -&gt; B^n) {
+  // Initialise values.
+  state := (0 : int[n]) as B^n;
+  state[n] := X(state[n]);
+
+  // Apply Hadamards.
+  state := bitwise_map(state, H);
+
+  // Apply oracle.
+  state := f(state);
+
+  // Apply Hadamards again.
+  state := bitwise_map(state, H);
+  state[n] := H(state[n]);
+
+  // Measure and return result.
+  return measure(state) == ((0 : int[n]) as B^n);
+}</code></pre>
+<p>This function returns <code>false</code> if the given function is
+constant and <code>true</code> if it is balanced.</p>
+<hr />
+<p><a href="iqps.html">Back</a></p>
+</body>
+</html>

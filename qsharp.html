@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Introduction to Quantum Programming Languages</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="css/style.css" />
+  
+  <script defer="" src="katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="katex/katex.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Introduction to Quantum Programming Languages</h1>
+</header>
+<h1 id="q">Q#</h1>
+<h3 id="overview">Overview</h3>
+<p>Q# is a domain-specific programming language (DSL), aimed at writing
+quantum algorithms without having to worry about implementation details
+such as the physical layout of a quantum computer.</p>
+<p>The Q# language was developed by Microsoft, and is part of their
+wider Quantum Development Kit, which includes:</p>
+<ul>
+<li><p>Q# libraries implementing several standard quantum operations and
+algorithms.</p></li>
+<li><p>Integration with classical programming languages such as Python,
+C#, and F#, through Microsoft’s Dot.net framework.</p></li>
+<li><p>Ways to run your Q# programs on different targets, such as
+simulators, resource estimators, or actual quantum hardware using
+Microsoft’s Azure Quantum programme. There is an orchestration language
+in which you can specify to run the Q# program on a simulator a number
+of times, and once on quantum hardware, for example.</p></li>
+</ul>
+<p>These last two points make Q# an interesting mix between an
+imperative and functional programming language: Q# itself is imperative,
+but it can be used in a functional way. It is also not (necessarily) a
+circuit description language, as quantum instructions are dispatched in
+order, and you can use measurement results as classical data in the
+continuation of your program.</p>
+<p>The easiest way to use Q# is through Microsoft’s Integrated
+Development Environment called Visual Studio Code, following the <a
+href="https://learn.microsoft.com/en-us/training/modules/qsharp-create-first-quantum-development-kit/2-install-quantum-development-kit-code">installation
+instructions</a>. There is official <a
+href="https://learn.microsoft.com/en-gb/training/paths/quantum-computing-fundamentals/">documentation</a>
+that is quite comprehensive. The following survey will be much
+briefer.</p>
+<h3 id="tutorial">Tutorial</h3>
+<p>Q# is an imperative language. Functions, called
+<code>operation</code>s, take in variables, and may return values. For
+example, here is an operation that creates <span
+class="math inline">\ket{\pm}</span> states:</p>
+<pre><code>operation PlusMinus(b : Bool) : Qubit {
+    use q = Qubit();
+    if b { X(q); }
+    H(q);
+    return q;
+}</code></pre>
+<p>The first line says that the input is a <code>Bool</code>ean value,
+and the output is a <code>Qubit</code>. The second line introduces a
+variable <code>q</code>, that is initialised to be of type
+<code>Qubit</code>, standardly to the value <span
+class="math inline">\ket{0}</span>. If the input Boolean was true, an
+<code>X</code> gate is applied to turn <code>q</code> into <span
+class="math inline">\ket{1}</span>. Then, <code>H</code> applies a
+Hadamard gate, and finally, the qubit is returned.</p>
+<p>Apart from Hadamard, you can have controlled-not gates, with
+<code>CNOT</code>, which takes two <code>Qubit</code>s. In fact,
+<code>CNOT</code> will accept a list of qubits to target, and a qubit to
+control them with, like so:</p>
+<pre><code>operation Oracle(cs : Qubit[], t : Qubit) : Unit is Adj {
+    for c in cs {
+        CNOT(c, t);
+    }
+}    </code></pre>
+<p>Here, <code>Unit</code> is a type that says that this operation does
+not return a value (like <code>void</code> in C). The annotation
+<code>is Adj</code> indicates that this operation implements a unitary
+transformation and has an adjoint specialisation. (There is also an
+annotation <code>is Ctl</code> indicating that the operation has a
+controlled specialisation, and <code>is Adj+Ctl</code> to say it has
+both.)</p>
+<p>Here is an operation that implements <span
+class="math inline">\alpha\ket{0}+\beta\ket{1} \mapsto \alpha \ket{00} +
+\beta\ket{11}</span>:</p>
+<pre><code>operation Share(a : Qubit) : (Qubit, Qubit) {
+    use b = Qubit();
+    CNOT(b,a);
+    return (a,b);
+}</code></pre>
+<p>To measure, there is an operation <code>M</code> that takes a
+<code>Qubit</code> and has output type <code>Result</code>. A variable
+of type <code>Result</code> can only have two values: <code>Zero</code>
+and <code>One</code>.</p>
+<pre><code>operation GenerateRandomBit() : Result {
+    use q = Qubit();
+    H(q);
+    return M(q);
+}</code></pre>
+<p>Measurement using <code>M</code> automatically discard the qubit.
+When you no longer need an unmeasured <code>Qubit</code>, you need to
+<code>Reset</code> it. The compiler will complain if you have not
+discarded all qubits in use by the end of the program.</p>
+<p>There are other types than <code>Qubit</code> and
+<code>Result</code>, such as <code>Bool</code>, <code>Int</code>,
+<code>Double</code>, and <code>String</code>, and you can build custom
+data types on those basic ones such as arrays.</p>
+<h3 id="deutsch-jozsa">Deutsch-Jozsa</h3>
+<p>To execute a Q# program takes some syntax. Here is a full
+implementation of the Deutsch-Jozsa algorithm, using the operation
+<code>Oracle</code> above:</p>
+<pre><code>namespace DeutschJozsa {
+
+    open Microsoft.Quantum.Canon;
+    open Microsoft.Quantum.Intrinsic;
+    open Microsoft.Quantum.Measurement;
+
+    operation DeutschJozsa(n:Int, oracle:((Qubit[], Qubit)=&gt;Unit)) : Boolean {
+      mutable isFunctionConstant = true;
+      use (qn, q2) = (Qubit[n], Qubit());
+      X(q2);
+      ApplyToEachA(H, qn);
+      H(q2);
+      oracle(qn, q2);                       
+      ApplyToEachA(H, qn);
+      if (MeasureAllZ(qn) != Zero) {
+        set isFunctionConstant = false;
+      }
+      ResetAll(qn);       
+      Reset(q2);       
+      return isFunctionConstant;
+    }
+
+    @EntryPoint()
+    operation Main() : Bool {
+      Message($&quot;The operation Oracle is &quot;);
+      mutable b = DeutschJozsa(1,Oracle);
+      if (b) {
+        Message($&quot;balanced.&quot;);
+      } else {
+      Message($&quot;constant.&quot;);
+    }
+    return b;
+  }</code></pre>
+<p>As you can see, a very nice feature of the Q# framework is that you
+can continue to compute using the result of a measurement as if nothing
+happened. This happens in <code>Main</code> above, where a
+<code>Result</code> type is coerced into <code>Bool</code> so the
+conditional <code>if</code> can act on it.</p>
+<h1 id="advanced-features">Advanced features</h1>
+<p>There are several advanced libraries and features to explore. For
+example:</p>
+<pre><code>open Microsoft.Quantum.Diagnostics;</code></pre>
+<p>provides an operation called <code>DumpMachine</code>, which will
+output the (simulated) current state of the computation. For example, if
+a qubit is initialised in state <span
+class="math inline">\ket{0}</span>, <code>DumpMachine</code> will say
+so:</p>
+<pre><code>|0⟩:     1.000000 +  0.000000 i  ==     ******************** [ 1.000000 ]   
+|1⟩:     0.000000 +  0.000000 i  ==                          [ 0.000000 ]</code></pre>
+<p><a href="iqps.html">Back</a></p>
+</body>
+</html>

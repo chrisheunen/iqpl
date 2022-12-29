@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Introduction to Quantum Programming Languages</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <link rel="stylesheet" href="css/style.css" />
+  
+  <script defer="" src="katex/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet" href="katex/katex.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Introduction to Quantum Programming Languages</h1>
+</header>
+<h1 id="quipper">Quipper</h1>
+<h3 id="overview">Overview</h3>
+<p>Quipper is a quantum circuit description language. It is functional
+in nature, so when writing Quipper programs you can think in terms of
+gates being applied in real time to qubit variables, just as you would
+for a classical functional program.</p>
+<p>Quipper is implemented as a domain-specific language within the
+functional programming language <a
+href="https://www.haskell.org">Haskell</a>. Quipper was developed at
+Dalhousie University by Peter Selinger, and remains open source. Its
+original goal was to to accurately estimate and reduce the computational
+resources required to implement quantum algorithms on a realistic
+quantum computer. It comes with a standard library implementation of 7
+nontrivial reference quantum algorithms; compiling them into quantum
+circuits tells you how many qubits are needed exactly.</p>
+<p>This brief survey will roughly follow the article <a
+href="http://arxiv.org/abs/1304.5485">An Introduction to Quantum
+Programming in Quipper</a>. For much more information, see the <a
+href="https://www.mathstat.dal.ca/~selinger/quipper/">Quipper
+homepage</a> and the official <a
+href="https://www.mathstat.dal.ca/~selinger/quipper/doc/">Quipper
+documentation</a>.</p>
+<h4 id="circuit-model">Circuit model</h4>
+<p>Quipper can express circuits that allow both quantum and classical
+wires and operations in the same circuit. Quantum operations can be
+controlled by a classical wire, but not the other way around. An
+explicit measurement operation turns a quantum wire into a classical
+wire.</p>
+<p>Quipper’s circuit model also has scope: some (ancilla) wires are only
+used in part of a circuit, and may be explicitly initialised and
+terminated part-way the circuit.</p>
+<p>There are three distinct phases of execution:</p>
+<ul>
+<li><p><strong>Compile time</strong>: when Quipper syntax is translated
+into an executable classical program.</p></li>
+<li><p><strong>Circuit generation time</strong>: when the resulting
+classical program generated a quantum circuit. Inputs whose value is
+known at this stage are called <strong>parameters</strong>. For example,
+the Deutsch-Jozsa algorithm is really a family of circuits, one for each
+natural number <code>n</code>.</p></li>
+<li><p><strong>Circuit execution time</strong>: when the resulting
+quantum circuit is executed on (simulated) quantum hardware. Inputs
+whose value are only known at this stage are called
+<strong>inputs</strong>. For example, the inputs to Deutsch-Jozsa on
+<code>n</code> qubits are <span class="math inline">n</span> input
+qubits.</p></li>
+</ul>
+<p>To keep the different kinds of input separate, Quipper uses three
+basic types for bits and qubits.</p>
+<ul>
+<li><p><strong>Bits</strong>: have type <code>Bool</code> at circuit
+generation time, and have type <code>Bit</code> as a classical Boolean
+input to a circuit.</p></li>
+<li><p><strong>Qubits</strong>: have type <code>Qubit</code> and are
+only available as inputs at circuit execution time.</p></li>
+</ul>
+<p><code>Bool</code> can be converted into <code>Bit</code>, but not the
+other way around. Because measurements can only occur at circuit
+execution time, their outcome is a <code>Bit</code>, not a
+<code>Bool</code>.</p>
+<p>Quipper is <strong>lazy</strong>. That is, when it evaluates a
+circuit-producing function, that circuit is produced on the fly. That is
+useful for very large circuits, which therefore don’t need to be stored
+in memory all at once. Circuits can also be consumed lazily.</p>
+<h4 id="embedded-language">Embedded language</h4>
+<p>Quipper is implemented as an embedded language within the host
+language Haskell, and the quipper compiler is really a wraparound for
+the Haskell compiler. Hence, Quipper really is a collection of data
+types, combinators, and functions within Haskell. However, not every
+Haskell program is a good Quipper program, and there is a preferred
+style of writing Quipper programs. If you don’t adhere to that style,
+there is no guarantee that Quipper acts as expected. Because of this
+more or less mandated programming style, you can also think of Quipper
+as a language in its own right, without thinking about Haskell.</p>
+<h4 id="primitive-operations">Primitive operations</h4>
+<p>Here is a very simple Quipper function:</p>
+<pre><code>plus_minus :: Bool -&gt; Circ Qubit
+plus_minus b = do
+  q &lt;- qinit b
+  r &lt;- hadamard q
+  return r</code></pre>
+<p>The first line is the type of the function. You could in fact leave
+it out, and the Quipper compiler will infer it. But for now it’s useful
+to see that the input to the function is a boolean parameter. The output
+type <code>Circ Qubit</code> says that the function results in a circuit
+that returns a single qubit. The body of the function uses three
+operations, that are evaluated in the given order. First, a variable
+<code>q</code> of type <code>Qubit</code> is initialised with value
+<code>b</code>. Here, <code>False</code> corresponds to <span
+class="math inline">\ket{0}</span> and <code>True</code> corresponds to
+<span class="math inline">\ket{1}</span>. Then, a <code>hadamard</code>
+operator is applied to the qubit, resulting in a new qubit
+<code>r</code>. Finally, <code>r</code> is returned as the output of the
+whole function.</p>
+<p>You could evaluate this function as follows:</p>
+<pre><code>import Quipper
+main = print_simple PDF (plus_minus False)</code></pre>
+<p>To obtain the following circuit as a PDF file:</p>
+<p><img src="img/quipper-simple.png" /></p>
+<p>Apart from the built-in function <code>hadamard</code>, you also have
+<code>qnot</code> for the <span class="math inline">X</span> gate, and
+the infix operator <code>'controlled'</code>, that turns any operation
+into a controlled one. This code:</p>
+<pre><code>share :: Qubit -&gt; Circ (Qubit, Qubit)
+share a = do
+  b &lt;- qinit False
+  b &lt;- qnot b &#39;controlled&#39; a
+  return (a,b)</code></pre>
+<p>gives a 2-qubit circuit, where the second qubit is initialised <span
+class="math inline">\ket{0}</span>, and a single CNOT gate is applied,
+that is, a circuit for the function <span
+class="math inline">\alpha\ket{0}+\beta\ket{1} \mapsto \alpha\ket{00} +
+\beta\ket{11}</span>.</p>
+<p>To <strong>measure</strong> a qubit, there is a function
+<code>measure</code>:</p>
+<pre><code>measurement :: Qubit -&gt; Circ Bit
+measurement q = do
+  x &lt;- measure q
+  return x</code></pre>
+<p>If you no longer need a measurement result, or any other
+<code>Bit</code>, you can discard it:</p>
+<pre><code>cdiscard x</code></pre>
+<h3 id="deutsch-jozsa">Deutsch-Jozsa</h3>
+<p>The Deutsch-Jozsa algorithm can now be written in Quipper as
+follows:</p>
+<pre><code>deutschjozsa :: (Qubit -&gt; Qubit -&gt; Qubit -&gt; Circ (Qubit, Qubit, Qubit)) 
+                -&gt; Circ (Bit, Bit)
+deutschjozsa (oracle) = do
+  x &lt;- qinit False
+  y &lt;- qinit False
+  z &lt;- qinit True
+  hadamard x
+  hadamard y
+  hadamard z
+  (x,y,z) &lt;- oracle x y z
+  hadamard x
+  hadamard y
+  (a,b) &lt;- measure (x,y)
+  return (a,b)</code></pre>
+<p>Here, <code>oracle</code> is a function of type
+<code>Qubit -&gt; Qubit -&gt; Qubit -&gt; Circ (Qubit, Qubit, Qubit)</code>;
+a circuit that turns 3 input qubits into 3 output qubits. Unlike in
+OpenQASM, we can feed the Quipper version of <code>deutschjozsa</code>
+any such function we like. It could be, as before:</p>
+<pre><code>oracle x y z = do
+  qnot_at z `controlled` [x, y]
+  return (x,y,z)</code></pre>
+<p>But it could also be any other function <code>oracle</code> of the
+right type.</p>
+<h3 id="advanced-mechanisms">Advanced mechanisms</h3>
+<p>Let us briefly touch on some of the more advanced mechanisms that
+Quipper offers.</p>
+<h4 id="quantum-data-types">Quantum data types</h4>
+<p>From the basic data types <code>Bit</code> and <code>Qubit</code>,
+you can build up more complicated data types, using tuples and lists.
+For example:</p>
+<ul>
+<li><code>(Qubit,[Qubit])</code> is a type whose elements are pairs of a
+qubit and a list of qubits.</li>
+</ul>
+<p>Every quantum data types has an associated classical data type, in
+this case <code>(Bit,[Bit])</code>, and an associated boolean data type,
+in this case <code>(Bool,[Bool])</code>.</p>
+<h4 id="generic-functions">Generic functions</h4>
+<p>The power of functional programming in Quipper comes to the fore with
+generic functions. We already saw <code>measure</code>,
+<code>cdiscard</code>, and <code>print_simple</code>. These are
+functions that can accept inputs of many different types. We won’t go
+into detail here, but for an example, here is a generic version of the
+<code>plus_minus</code> function above:</p>
+<pre><code>plus_minus_generic a = do
+  qs &lt;- qinit a
+  qs &lt;- mapUnitary hadamard qs
+  return qs</code></pre>
+<p>This function does not just apply to <code>Bool</code>, but can also
+produce, for example, a circuit of type <code>(Qubit,[Qubit])</code> out
+of <code>(Bool,[Bool])</code>.</p>
+<h4 id="recursion">Recursion</h4>
+<p>In Quipper you can write circuit-producing functions that are
+recursive over any parameters known at circuit generation time. So, for
+example, you can recurse over a list of qubits. For a nice recursive
+implementation of the Quantum Fourier Transform, see <a
+href="http://arxiv.org/abs/1304.5485">An Introduction to Quantum
+Programming in Quipper</a>.</p>
+<h4 id="circuit-operations">Circuit operations</h4>
+<p>You can also write functions that take a circuit, say of type
+<code>Circ [Qubit]</code>, and make new circuits based on it. For
+example, repeating a circuit a number of times, or reversing a circuit,
+or use a given circuit as a subcircuit in a larger circuit.</p>
+<p>Finally, any classical reversible function can be turned into a
+circuit automatically by Quipper. Write a function such as</p>
+<pre><code>reversiblefunction :: (Bool, Bool, Bool) -&gt; (Bool, Bool, Bool)
+reversiblefunction x y z = y z x</code></pre>
+<p>and then turn it into a circuit by using the operation
+<code>build_circuit</code> just before:</p>
+<pre><code>build_circuit
+reversiblefunction :: (Bool, Bool, Bool) -&gt; (Bool, Bool, Bool)
+reversiblefunction x y z = y z x</code></pre>
+<h4 id="semantics">Semantics</h4>
+<p>Quipper is one of few quantum programming languages with well-founded
+semantics. Haskell is well-studied academically, and many of its
+mathematical models extend to Quipper. For example, the crucial
+<code>Circ</code> construction is in fact a <a
+href="https://wiki.haskell.org/Monad">monad</a>. However, some aspects
+of Quipper that would be useful for a quantum programming language are
+not well reflected in Haskell:</p>
+<ul>
+<li><strong>Dependent types</strong>: Haskell has no mechanism to
+recognise that a parameter of type <code>Bool</code> is available at
+circuit generation time, but a <code>Bit</code> is only used at circuit
+execution time.</li>
+<li><strong>Linear types</strong>: qubits cannot be copied or deleted,
+but terms of any Haskell type can.</li>
+</ul>
+<p>There is a family of descendants of Quipper, called <a
+href="https://arxiv.org/abs/2204.13041">Proto-Quipper</a>, that aim to
+make Quipper a standalone language and semantics to remedy these
+issues.</p>
+<hr />
+<p><a href="iqps.html">Back</a></p>
+</body>
+</html>
