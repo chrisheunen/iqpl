@@ -166,5 +166,5 @@ There is a family of descendants of Quipper, called [Proto-Quipper](https://arxi
 
 ---
 
-[Back](iqps.html)
+[Back](index.html)
 

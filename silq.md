@@ -117,4 +117,4 @@ This function returns `false` if the given function is constant and `true` if it
 
 ---
 
-[Back](iqps.html)
+[Back](index.html)

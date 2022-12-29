@@ -161,4 +161,4 @@ A range of [Jupyter notebooks](https://github.com/Qiskit/qiskit-tutorials) are a
 
 ---
 
-[Back](iqps.html)
+[Back](index.html)
