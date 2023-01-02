@@ -91,7 +91,7 @@ We can then compose circuits with matching registers:
     
     qc1.compose(qc4)
 
-Finally, we can output a `QuantumCircuit` to an OpenQASM 2.0 string using the `qasm` method:
+Finally, we can output a `QuantumCircuit` to an OpenQASM 2.0 string using the `qasm` method.
 
 
 ### Deutsch-Jozsa algorithm
