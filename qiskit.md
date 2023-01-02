@@ -93,8 +93,70 @@ We can then compose circuits with matching registers:
 
 Finally, we can output a `QuantumCircuit` to an OpenQASM 2.0 string using the `qasm` method.
 
+## Simulating and running quantum circuits
 
-### Deutsch-Jozsa algorithm
+As described above, Qiskit also makes it possible to interact with various quantum hardward providers, as well as to run a simulation of a given quantum circuit on a classical backend. This allows one to extract (real or simulated) output states or outcome probabilites for measurements. The frontend for running circuits on actual quantum hardware is described in the [documentation](https://qiskit.org/documentation/partners/) and depends on the provider in question.
+
+We focus here on the classical simulation backends. These are provided via the `qiskit.providers.aer` submodule, specifically the [`AerSimulator`](https://qiskit.org/documentation/stubs/qiskit_aer.AerSimulator.html#qiskit_aer.AerSimulator) class.
+
+    from qiskit.providers.aer import AerSimulator
+
+In order to run the simulation, we need to set a initial state for each qubit. Here is an elementary example:
+
+    qc5 = qs.QuantumCircuit(1,0)
+    qc5.initialize([1,0],0)
+    qc5.h(0)
+    
+    qc5.save_statevector()
+    simulator = AerSimulator()
+    qobj = qs.assemble(qc5, shots=1024)
+    result = simulator.run(qobj).result()
+    result.get_statevector()
+
+with result:
+
+    Statevector([0.70710678+0.j, 0.70710678+0.j],
+            dims=(2,))
+
+We can also get the resulting probabilities for different outcomes of a measurement in the computational basis:
+
+    result.get_counts()
+
+Putting this all together, we can simulate the output state for one of our circuits for a given input state:
+
+    qc6 = qs.QuantumCircuit(4)
+    qc6.initialize([1,0],0)
+    qc6.initialize([1,0],1)
+    qc6.initialize([1,0],2)
+    qc6.initialize([1,0],3)
+    qc6 = qc6.compose(qc1)
+
+    qc6.save_statevector()
+    qobj = qs.assemble(qc6)
+    result = simulator.run(qobj).result() # Do the simulation and return the result
+    result.get_statevector()
+
+This returns the result:
+
+    Statevector([0.70710678+0.j, 0.        +0.j, 0.        +0.j,
+                 0.70710678+0.j, 0.        +0.j, 0.        +0.j,
+                 0.        +0.j, 0.        +0.j, 0.        +0.j,
+                 0.        +0.j, 0.        +0.j, 0.        +0.j,
+                 0.        +0.j, 0.        +0.j, 0.        +0.j,
+                 0.        +0.j],
+             dims=(2, 2, 2, 2))
+
+If we add measurements to each qubit at the end of the circuit (using the `measure_all` method), we can then simulate outcome counts for the measurement. By default, these counts are made over 1024 simulated runs of the circuit.
+
+    qc6.measure_all()
+    qobj = qs.assemble(qc6)
+    result = simulator.run(qobj).result() # Do the simulation and return the result
+    result.get_counts()
+
+Although the topic is beyond the scope of this tutorial, one of the main selling points of Qiskit Aer is that it provides [realistic noise models](https://qiskit.org/documentation/apidoc/aer_noise.html) for simulating quantum circuits run on NISQ devices.
+
+
+## Deutsch-Jozsa algorithm
 
 For a complete explanation, see [here](https://qiskit.org/textbook/ch-algorithms/deutsch-jozsa.html).
 
