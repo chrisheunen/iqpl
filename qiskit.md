@@ -82,7 +82,7 @@ We can also initialise qubits with the following syntax:
 
 The first argument to `initialize` describes a qubit state as a pair of coefficients in the computational basis. The second argument describes the target qubit in the circuit for initialisation.
 
-We can then compose circuits with matching registers simply by "summing" them:
+We can then compose circuits with matching registers:
 
     qc4 = qs.QuantumCircuit(4)
     
