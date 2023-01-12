@@ -31,6 +31,9 @@
 }}});
   </script>
   <link rel="stylesheet" href="katex/katex.min.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
@@ -112,13 +115,13 @@ for <a
 href="https://openqasm.com/language/types.html#complex-numbers">complex
 numbers</a>, since these are unavoidable when manipulating qubits. These
 can be initialised at the same time as declaration:</p>
-<pre><code>    float x = 5.6;
-    angle ang = pi / 3;
-    complex[float] z = 3.3 + 2.2 im;</code></pre>
+<pre><code>float x = 5.6;
+angle ang = pi / 3;
+complex[float] z = 3.3 + 2.2 im;</code></pre>
 <p>The real and imaginary parts of a complex number can be obtained
 as:</p>
-<pre><code>    float real_part = real(z);
-    float imag_part = imag(z);</code></pre>
+<pre><code>float real_part = real(z);
+float imag_part = imag(z);</code></pre>
 <p>Most of these types have a syntax for declaring a desired size (for
 integers) or precision (for floating points, angles and complex numbers)
 and which we have decided to ignore for brievity’s sake—in which case
@@ -129,8 +132,8 @@ from other data types a key way: they cannot be initialised in the same
 statement as their declaration. In fact, the only built-in way to
 initialise a qubit is with the special statement <code>reset</code>,
 which sets the qubit to the 0 computational basis state:</p>
-<pre><code>    qubit q;
-    reset q;</code></pre>
+<pre><code>qubit q;
+reset q;</code></pre>
 <h4 id="unitary-quantum-gates">Unitary quantum gates</h4>
 <p>Unitary quantum operations on qubits are refered to as gates. There
 is only a single built-in gate, <code>U</code>. It parametrises a
@@ -142,9 +145,9 @@ single-qubit unitary as a rotation of the Bloch sphere of the form:</p>
     \end{pmatrix}
 </span></p>
 <p>For example,</p>
-<pre><code>    qubit q;
-    reset q;
-    U(pi,0,pi) q;</code></pre>
+<pre><code>qubit q;
+reset q;
+U(pi,0,pi) q;</code></pre>
 <p>enacts a Pauli X gate on the qubit <code>q</code>. Since
 <code>q</code> was reset to the 0 basis state, <code>q</code> is then in
 the 1 basis state at the end of the program.</p>
@@ -154,52 +157,52 @@ call. OpenQASM therefore provides a construct for abstracting gate
 names: the <a
 href="https://openqasm.com/language/gates.html"><code>gate</code>
 block</a>. For example,</p>
-<pre><code>    gate X a {
-       U(pi, 0, pi) a;
-    }</code></pre>
+<pre><code>gate X a {
+   U(pi, 0, pi) a;
+}</code></pre>
 <p>abstracts the Pauli X gate used above, while</p>
-<pre><code>    gate H a {
-       U(pi/2, 0, pi) a;
-    }</code></pre>
+<pre><code>gate H a {
+   U(pi/2, 0, pi) a;
+}</code></pre>
 <p>constructs a Hadamard gate.</p>
 <p>Controlled gates can be constructed by adding a <code>ctrl</code>
 modifier to a pre-existing gate:</p>
-<pre><code>   ctrl @ U(a,b,c) q_reg[0], q_reg[1];</code></pre>
+<pre><code>ctrl @ U(a,b,c) q_reg[0], q_reg[1];</code></pre>
 <p>Formally speaking, this implements the gate <span
 class="math inline">1 \oplus U(a,b,c)</span>. This can then be
 abstracted using the <code>gate</code> block:</p>
-<pre><code>    gate CX a, b {
-       ctrl @ U(pi, 0, pi) a, b;
-    }
-    
-    CX q_reg[0], q_reg[1];</code></pre>
+<pre><code>gate CX a, b {
+   ctrl @ U(pi, 0, pi) a, b;
+}
+
+CX q_reg[0], q_reg[1];</code></pre>
 <p>constucts and runs a quantum controlled-NOT or CX gate.</p>
 <p>For instance, here is a simple circuit for generating a Bell
 state:</p>
-<pre><code>    gate H a {
-       U(pi/2, 0, pi) a;
-    }
+<pre><code>gate H a {
+   U(pi/2, 0, pi) a;
+}
 
-    gate CX a, b {
-       ctrl @ U(pi, 0, pi) a, b;
-    }
-    
-    qubit[2] = q_reg;
-    reset q_reg;
+gate CX a, b {
+   ctrl @ U(pi, 0, pi) a, b;
+}
 
-    H q_reg[0];
-    CX q_reg[0], q_reg[1];</code></pre>
+qubit[2] = q_reg;
+reset q_reg;
+
+H q_reg[0];
+CX q_reg[0], q_reg[1];</code></pre>
 <p>The resulting state is the Bell state <span class="math display">
     \frac{1}{\sqrt{2}} (\ket{00} + \ket{11})
 </span></p>
 <h4 id="measurements-and-classical-control">Measurements and classical
 control</h4>
 <p>Finally, measurements are programmed with the following syntax:</p>
-<pre><code>    bit b; 
-    qubit q;
-    reset q;
+<pre><code>bit b; 
+qubit q;
+reset q;
 
-    b = measure q;</code></pre>
+b = measure q;</code></pre>
 <p>This performs a measurement of the qubit <code>q</code> in the
 computational basis. The bit <code>b</code> can then be used to control
 future quantum gates with standard classical control flow: <a
@@ -211,41 +214,41 @@ href="https://openqasm.com/language/classical.html#while-loops">while</a>
 loops.</p>
 <p>Finally, here is a circuit for quantum teleportation, which assembles
 all of these constructs:</p>
-<pre><code>    gate H a {
-       U(pi/2, 0, pi) a;
-    }
+<pre><code>gate H a {
+   U(pi/2, 0, pi) a;
+}
 
-    gate X {
-       U(pi, 0, pi) a;
-    }
-    
-    gate Z(m) {
-       U(0, 0, pi) a;
-    }
-    
-    gate CX a, b {
-       ctrl @ U(pi, 0, pi) a, b;
-    }
+gate X {
+   U(pi, 0, pi) a;
+}
 
-    qubit input_state;
-    reset input_state;
+gate Z(m) {
+   U(0, 0, pi) a;
+}
 
-    // Create a Bell state
-    qubit[2] bell_state;
-    reset bell_state;
-    H bell_state[0];
-    CX bell_state[0], bell_state[1];
+gate CX a, b {
+   ctrl @ U(pi, 0, pi) a, b;
+}
 
-    // Entangle the input state with Bell state
-    CX input_state, bell_state[0];
+qubit input_state;
+reset input_state;
 
-    // Measure and correct
-    bit m1 = measure input_state;
-    bit m2 = measure bell_state[0];
-    if (m2 == 1) 
-       X bell_state[1];
-    if (m1 == 1) 
-       Z bell_state[1];</code></pre>
+// Create a Bell state
+qubit[2] bell_state;
+reset bell_state;
+H bell_state[0];
+CX bell_state[0], bell_state[1];
+
+// Entangle the input state with Bell state
+CX input_state, bell_state[0];
+
+// Measure and correct
+bit m1 = measure input_state;
+bit m2 = measure bell_state[0];
+if (m2 == 1) 
+   X bell_state[1];
+if (m1 == 1) 
+   Z bell_state[1];</code></pre>
 <h3 id="deutsch-jozsa">Deutsch-Jozsa</h3>
 <p>Let’s implement the <a
 href="https://en.wikipedia.org/wiki/Deutsch%E2%80%93Jozsa_algorithm">Deutsch-Jozsa
@@ -323,10 +326,10 @@ class="math inline">xyz</span></th>
 </table>
 <p>We can implement this unitary with two CNOT gates, and hence in
 OpenQASM as follows:</p>
-<pre><code>    gate Oracle x y z {}
-        CX x z;
-        CX y z;
-    }   </code></pre>
+<pre><code>gate Oracle x y z {}
+    CX x z;
+    CX y z;
+}   </code></pre>
 <p>With the oracle in hand, we can now implement the rest of the
 Deutsch-Jozsa algorithm as follows:</p>
 <pre><code>// declare three qubits
@@ -357,7 +360,7 @@ class="math inline">f</span> was indeed balanced.</p>
 <p>OpenQASM is a standard that has been defined in three different
 versions. You can declare which version your code is adhering to by
 having the following first line in your code:</p>
-<pre><code>    OPENQASM 2.0;</code></pre>
+<pre><code>OPENQASM 2.0;</code></pre>
 <p>OpenQASM 1.0 and 2.0 were mainly developed by IBM. For OpenQASM 2.0
 there are several compilers that input OpenQASM code and output a
 quantum circuit, not least of which the <a href="#qiskit">Qiskit</a>
