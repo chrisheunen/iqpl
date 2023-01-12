@@ -266,31 +266,47 @@ To implement the oracle, we have to turn it into a unitary on 3 qubits, that tak
 
 We can implement this unitary with two CNOT gates, and hence in OpenQASM as follows:
 
-    gate Oracle x y z {}
-        CX x z;
-        CX y z;
+    gate Oracle x, y, z {
+        ctrl @ U(pi, 0, pi) x, z;
+        ctrl @ U(pi, 0, pi) y, z;
     }   
-
+    
 With the oracle in hand, we can now implement the rest of the Deutsch-Jozsa algorithm as follows:
-
+    gate CX a, b {
+       ctrl @ U(pi, 0, pi) a, b;
+    }
+    
+    gate H a {
+       U(pi/2, 0, pi) a;
+    }
+    
+    gate X a {
+       U(pi, 0, pi) a;
+    }
+        
     // declare three qubits
-    qreg x;
-    qreg y;
-    qreg z;
+    qubit x;
+    qubit y;
+    qubit z;
+    
     // set the three qubits to |0>, |0>, and |1>
     reset x;
     reset y;
     reset z;
     X z;
+    
     // apply Hadamard to all three qubits
     H x;
     H y;
     H z;
+    
     // apply the oracle
-    Oracle x y z;
+    Oracle x, y, z;
+    
     // apply Hadamard to the first two qubits
     H x;
     H y;
+    
     // measure the first two qubits
     bit a = measure x;
     bit b = measure y;
