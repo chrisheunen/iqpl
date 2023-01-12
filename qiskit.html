@@ -53,16 +53,18 @@ providers</a> in the cloud.</p>
 <p>Qiskit is provided as a Pypi package for Python. As a result, its
 syntax follows the rules of Python. For starters, we import the package
 as usual:</p>
-<p>import qiskit as qs</p>
+<pre><code>import qiskit as qs</code></pre>
 <p>The core class for describing a quantum circuit in Qiskit is,
 unsurprisingly, the <code>QuantumCircuit</code> class. Its constructor
 takes up to two integer arguments, used to specify the number of quantum
 and classical registers (qubits and bits):</p>
-<p>qc1 = qs.QuantumCircuit(4) # Construct a QuantumCircuit with 4 qubits
-qc2 = qs.QuantumCircuit(4,3) # … or with 4 qubits and 3 bits</p>
+<pre><code>qc1 = qs.QuantumCircuit(4) # Construct a QuantumCircuit with 4 qubits
+qc2 = qs.QuantumCircuit(4,3) # ... or with 4 qubits and 3 bits</code></pre>
 <p>We can then enact gates on the circuit by calling the corresponding
 methods of the class:</p>
-<p>qc1.h(0) qc1.cx(0,1) qc1.cx(4,3)</p>
+<pre><code>qc1.h(0)
+qc1.cx(0,1)
+qc1.cx(4,3)</code></pre>
 <p>We can then visualise this circuit with <code>qc1.draw()</code>:</p>
 <p><img src="assets/png/qiskit_qc1.png" /></p>
 <p>As you can see, the register of qubits is 0-indexed. Qiskit
@@ -73,35 +75,48 @@ href="https://qiskit.org/documentation/stubs/qiskit.circuit.QuantumCircuit.html"
 Python).</p>
 <p>Measurements are a little different: they of course require access to
 a classical bit to store the outcome of the measurement.</p>
-<p>qc2.h(0) qc2.cx(0,1) qc2.cx(4,3)</p>
-<p>qc2.measure(2,0)</p>
+<pre><code>qc2.h(0)
+qc2.cx(0,1)
+qc2.cx(4,3)
+
+qc2.measure(2,0)</code></pre>
 <p>This results in the circuit:</p>
 <p><img src="assets/png/qiskit_qc2.png" /></p>
 <p>We can then compose circuits with matching registers as follows:</p>
-<p>qc3 = qs.QuantumCircuit(4)</p>
-<p>qc3.cx(2,4) qc3.cx(1,3)</p>
-<p>qc1.compose(qc3).draw()</p>
+<pre><code>qc3 = qs.QuantumCircuit(4)
+
+qc3.cx(2,4)
+qc3.cx(1,3)
+
+qc1.compose(qc3).draw()</code></pre>
 <p>We can also build a <code>QuantumCircuit</code> whose quantum
 register is split into named subregisters. To understand this, we first
 need to introduce the <code>QuantumRegister</code> class, with an
 optional name:</p>
-<p>qreg1 = qs.QuantumRegister(2,“register1”) qreg2 =
-qs.QuantumRegister(2,“register2”)</p>
+<pre><code>qreg1 = qs.QuantumRegister(2,&quot;register1&quot;)
+qreg2 = qs.QuantumRegister(2,&quot;register2&quot;)</code></pre>
 <p><code>ClassicalRegister</code> has an analogous syntax for
 constructing classical registers. Then, we can build a
 <code>QuantumCircuit</code> from these registers:</p>
-<p>qc3 = qs.QuantumCircuit(qreg1, qreg2)</p>
-<p>qc3.h(0) qc3.cx(qreg1[0],qreg1[1]) qc3.cx(qreg2[1],qreg2[0])</p>
+<pre><code>qc3 = qs.QuantumCircuit(qreg1, qreg2)
+
+qc3.h(0)
+qc3.cx(qreg1[0],qreg1[1])
+qc3.cx(qreg2[1],qreg2[0])</code></pre>
 <p>We can also initialise qubits with the following syntax:</p>
-<p>qc3 = qc1.copy() qc3.initialize([0,1], 2)</p>
+<pre><code>qc3 = qc1.copy()
+qc3.initialize([0,1], 2)</code></pre>
 <p>The first argument to <code>initialize</code> describes a qubit state
 as a pair of coefficients in the computational basis. The second
 argument describes the target qubit in the circuit for
 initialisation.</p>
 <p>We can then compose circuits with matching registers:</p>
-<p>qc4 = qs.QuantumCircuit(4)</p>
-<p>qc4.cx(2,3) qc4.cx(1,3)</p>
-<p>qc1.compose(qc4)</p>
+<pre><code>qc4 = qs.QuantumCircuit(4)
+
+qc4.cx(2,3)
+qc4.cx(1,3)
+
+qc1.compose(qc4)</code></pre>
 <p>Finally, we can output a <code>QuantumCircuit</code> to an OpenQASM
 2.0 string using the <code>qasm</code> method.</p>
 <h2 id="simulating-and-running-quantum-circuits">Simulating and running
@@ -119,37 +134,53 @@ provided via the <code>qiskit.providers.aer</code> submodule,
 specifically the <a
 href="https://qiskit.org/documentation/stubs/qiskit_aer.AerSimulator.html#qiskit_aer.AerSimulator"><code>AerSimulator</code></a>
 class.</p>
-<p>from qiskit.providers.aer import AerSimulator</p>
+<pre><code>from qiskit.providers.aer import AerSimulator</code></pre>
 <p>In order to run the simulation, we need to set a initial state for
 each qubit. Here is an elementary example:</p>
-<p>qc5 = qs.QuantumCircuit(1,0) qc5.initialize([1,0],0) qc5.h(0)</p>
-<p>qc5.save_statevector() simulator = AerSimulator() qobj =
-qs.assemble(qc5, shots=1024) result = simulator.run(qobj).result()
-result.get_statevector()</p>
+<pre><code>qc5 = qs.QuantumCircuit(1,0)
+qc5.initialize([1,0],0)
+qc5.h(0)
+
+qc5.save_statevector()
+simulator = AerSimulator()
+qobj = qs.assemble(qc5, shots=1024)
+result = simulator.run(qobj).result()
+result.get_statevector()</code></pre>
 <p>with result:</p>
-<p>Statevector([0.70710678+0.j, 0.70710678+0.j], dims=(2,))</p>
+<pre><code>Statevector([0.70710678+0.j, 0.70710678+0.j],
+dims=(2,))</code></pre>
 <p>We can also get the resulting probabilities for different outcomes of
 a measurement in the computational basis:</p>
-<p>result.get_counts()</p>
+<pre><code>result.get_counts()</code></pre>
 <p>Putting this all together, we can simulate the output state for one
 of our circuits for a given input state:</p>
-<p>qc6 = qs.QuantumCircuit(4) qc6.initialize([1,0],0)
-qc6.initialize([1,0],1) qc6.initialize([1,0],2) qc6.initialize([1,0],3)
-qc6 = qc6.compose(qc1)</p>
-<p>qc6.save_statevector() qobj = qs.assemble(qc6) result =
-simulator.run(qobj).result() # Do the simulation and return the result
-result.get_statevector()</p>
+<pre><code>qc6 = qs.QuantumCircuit(4)
+qc6.initialize([1,0],0)
+qc6.initialize([1,0],1)
+qc6.initialize([1,0],2)
+qc6.initialize([1,0],3)
+qc6 = qc6.compose(qc1)
+
+qc6.save_statevector()
+qobj = qs.assemble(qc6)
+result = simulator.run(qobj).result() # Do the simulation and return the result
+result.get_statevector()</code></pre>
 <p>This returns the result:</p>
-<p>Statevector([0.70710678+0.j, 0.+0.j, 0.+0.j, 0.70710678+0.j, 0.+0.j,
-0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j,
-0.+0.j, 0.+0.j], dims=(2, 2, 2, 2))</p>
+<pre><code>Statevector([0.70710678+0.j, 0.+0.j, 0.+0.j,
+ 0.70710678+0.j, 0.+0.j, 0.+0.j,
+ 0.+0.j, 0.+0.j, 0.+0.j,
+ 0.+0.j, 0.+0.j, 0.+0.j,
+ 0.+0.j, 0.+0.j, 0.+0.j,
+ 0.+0.j],
+ dims=(2, 2, 2, 2))</code></pre>
 <p>If we add measurements to each qubit at the end of the circuit (using
 the <code>measure_all</code> method), we can then simulate outcome
 counts for the measurement. By default, these counts are made over 1024
 simulated runs of the circuit.</p>
-<p>qc6.measure_all() qobj = qs.assemble(qc6) result =
-simulator.run(qobj).result() # Do the simulation and return the result
-result.get_counts()</p>
+<pre><code>qc6.measure_all()
+qobj = qs.assemble(qc6)
+result = simulator.run(qobj).result() # Do the simulation and return the result
+result.get_counts()</code></pre>
 <p>Although the topic is beyond the scope of this tutorial, one of the
 main selling points of Qiskit Aer is that it provides <a
 href="https://qiskit.org/documentation/apidoc/aer_noise.html">realistic
@@ -158,36 +189,60 @@ devices.</p>
 <h2 id="deutsch-jozsa-algorithm">Deutsch-Jozsa algorithm</h2>
 <p>For a complete explanation, see <a
 href="https://qiskit.org/textbook/ch-algorithms/deutsch-jozsa.html">here</a>.</p>
-<h1 id="initialization">initialization</h1>
-<p>import numpy as np</p>
-<h1 id="importing-qiskit">importing Qiskit</h1>
-<p>from qiskit import IBMQ, Aer from qiskit.providers.ibmq import
-least_busy from qiskit import QuantumCircuit, assemble, transpile</p>
-<h1 id="import-basic-plot-tools">import basic plot tools</h1>
-<p>from qiskit.visualization import plot_histogram</p>
-<h1 id="set-the-length-of-the-n-bit-input-string.">set the length of the
-n-bit input string.</h1>
-<p>n = 3</p>
-<p>const_oracle = QuantumCircuit(n+1)</p>
-<p>output = np.random.randint(2) if output == 1: const_oracle.x(n)</p>
-<p>dj_circuit = QuantumCircuit(n+1, n)</p>
-<h1 id="apply-h-gates">Apply H-gates</h1>
-<p>for qubit in range(n): dj_circuit.h(qubit)</p>
-<h1 id="put-qubit-in-state--">Put qubit in state |-&gt;</h1>
-<p>dj_circuit.x(n) dj_circuit.h(n)</p>
-<p>dj_circuit = QuantumCircuit(n+1, n)</p>
-<h1 id="apply-h-gates-1">Apply H-gates</h1>
-<p>for qubit in range(n): dj_circuit.h(qubit)</p>
-<h1 id="put-qubit-in-state---1">Put qubit in state |-&gt;</h1>
-<p>dj_circuit.x(n) dj_circuit.h(n)</p>
-<h1 id="add-oracle">Add oracle</h1>
-<p>dj_circuit += balanced_oracle</p>
-<h1 id="repeat-h-gates">Repeat H-gates</h1>
-<p>for qubit in range(n): dj_circuit.h(qubit) dj_circuit.barrier()</p>
-<h1 id="measure">Measure</h1>
-<p>for i in range(n): dj_circuit.measure(i, i)</p>
-<h1 id="display-circuit">Display circuit</h1>
-<p>dj_circuit.draw()</p>
+<pre><code># initialization
+import numpy as np
+
+# importing Qiskit
+from qiskit import IBMQ, Aer
+from qiskit.providers.ibmq import least_busy
+from qiskit import QuantumCircuit, assemble, transpile
+
+# import basic plot tools
+from qiskit.visualization import plot_histogram
+
+# set the length of the n-bit input string. 
+n = 3
+
+const_oracle = QuantumCircuit(n+1)
+
+output = np.random.randint(2)
+if output == 1:
+const_oracle.x(n)
+
+dj_circuit = QuantumCircuit(n+1, n)
+
+# Apply H-gates
+for qubit in range(n):
+dj_circuit.h(qubit)
+
+# Put qubit in state |-&gt;
+dj_circuit.x(n)
+dj_circuit.h(n)
+
+dj_circuit = QuantumCircuit(n+1, n)
+
+# Apply H-gates
+for qubit in range(n):
+dj_circuit.h(qubit)
+
+# Put qubit in state |-&gt;
+dj_circuit.x(n)
+dj_circuit.h(n)
+
+# Add oracle
+dj_circuit += balanced_oracle
+
+# Repeat H-gates
+for qubit in range(n):
+dj_circuit.h(qubit)
+dj_circuit.barrier()
+
+# Measure
+for i in range(n):
+dj_circuit.measure(i, i)
+
+# Display circuit
+dj_circuit.draw()</code></pre>
 <p><img src="assets/png/qiskit_dj.png" /></p>
 <p>A range of <a
 href="https://github.com/Qiskit/qiskit-tutorials">Jupyter notebooks</a>
