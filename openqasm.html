@@ -187,7 +187,7 @@ gate CX a, b {
    ctrl @ U(pi, 0, pi) a, b;
 }
 
-qubit[2] = q_reg;
+qubit[2] q_reg;
 reset q_reg;
 
 H q_reg[0];
@@ -222,7 +222,7 @@ gate X {
    U(pi, 0, pi) a;
 }
 
-gate Z(m) {
+gate Z {
    U(0, 0, pi) a;
 }
 
@@ -245,10 +245,12 @@ CX input_state, bell_state[0];
 // Measure and correct
 bit m1 = measure input_state;
 bit m2 = measure bell_state[0];
-if (m2 == 1) 
-   X bell_state[1];
-if (m1 == 1) 
-   Z bell_state[1];</code></pre>
+if (m2 == true) {
+    X bell_state[1];
+}
+if (m1 == true) {
+   Z bell_state[1];
+}</code></pre>
 <h3 id="deutsch-jozsa">Deutsch-Jozsa</h3>
 <p>Let’s implement the <a
 href="https://en.wikipedia.org/wiki/Deutsch%E2%80%93Jozsa_algorithm">Deutsch-Jozsa

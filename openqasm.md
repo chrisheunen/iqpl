@@ -215,7 +215,7 @@ these constructs:
        U(pi, 0, pi) a;
     }
     
-    gate Z(m) {
+    gate Z {
        U(0, 0, pi) a;
     }
     
@@ -238,10 +238,12 @@ these constructs:
     // Measure and correct
     bit m1 = measure input_state;
     bit m2 = measure bell_state[0];
-    if (m2 == 1) 
-       X bell_state[1];
-    if (m1 == 1) 
+    if (m2 == true) {
+        X bell_state[1];
+    }
+    if (m1 == true) {
        Z bell_state[1];
+    }
 
 ### Deutsch-Jozsa
 
