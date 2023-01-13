@@ -102,36 +102,11 @@ qubit q;
 qubit[5] q_reg;</code></pre>
 <p>Note that registers have a fixed size and cannot be resized after
 declaration.</p>
-<p>The language also has some expected types for classical data (<a
-href="https://openqasm.com/language/types.html#boolean-types">booleans</a>,
-<a
-href="https://openqasm.com/language/types.html#integers">integers</a>)
-but more interestingly for a low-level language includes data types for
-<a
-href="https://openqasm.com/language/types.html#floating-point-numbers">floating
-points</a>, for <a
-href="https://openqasm.com/language/types.html#angles">angles</a> and
-for <a
-href="https://openqasm.com/language/types.html#complex-numbers">complex
-numbers</a>, since these are unavoidable when manipulating qubits. These
-can be initialised at the same time as declaration:</p>
-<pre><code>float x = 5.6;
-angle ang = pi / 3;
-complex[float] z = 3.3 + 2.2 im;</code></pre>
-<p>The real and imaginary parts of a complex number can be obtained
-as:</p>
-<pre><code>float real_part = real(z);
-float imag_part = imag(z);</code></pre>
-<p>Most of these types have a syntax for declaring a desired size (for
-integers) or precision (for floating points, angles and complex numbers)
-and which we have decided to ignore for brievity’s sake—in which case
-the program uses a size/precisision which is specified by the target
-architecture.</p>
-<p>It is important to emphasize at this point that qubits stand apart
-from other data types a key way: they cannot be initialised in the same
-statement as their declaration. In fact, the only built-in way to
-initialise a qubit is with the special statement <code>reset</code>,
-which sets the qubit to the 0 computational basis state:</p>
+<p>It is important to emphasize at this point that qubits cannot be
+initialised in the same statement as their declaration. In fact, the
+only built-in way to initialise a qubit is with the special statement
+<code>reset</code>, which sets the qubit to the 0 computational basis
+state:</p>
 <pre><code>qubit q;
 reset q;</code></pre>
 <h4 id="unitary-quantum-gates">Unitary quantum gates</h4>

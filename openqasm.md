@@ -78,35 +78,10 @@ registers of bits and registers of qubits:
 
 Note that registers have a fixed size and cannot be resized after declaration.
 
-The language also has some expected types for classical data
-([booleans](https://openqasm.com/language/types.html#boolean-types),
-[integers](https://openqasm.com/language/types.html#integers)) but more
-interestingly for a low-level language includes data types for [floating
-points](https://openqasm.com/language/types.html#floating-point-numbers), for
-[angles](https://openqasm.com/language/types.html#angles) and for [complex
-numbers](https://openqasm.com/language/types.html#complex-numbers), since
-these are unavoidable when manipulating qubits. These can be initialised at
-the same time as declaration:
-
-    float x = 5.6;
-    angle ang = pi / 3;
-    complex[float] z = 3.3 + 2.2 im;
-
-The real and imaginary parts of a complex number can be obtained as:
-
-    float real_part = real(z);
-    float imag_part = imag(z);
-
-Most of these types have a syntax for declaring a desired size (for
-integers) or precision (for floating points, angles and complex numbers)
-and which we have decided to ignore for brievity's sake---in which case the
-program uses a size/precisision which is specified by the target architecture.
-
-It is important to emphasize at this point that qubits stand apart from other
-data types a key way: they cannot be initialised in the same statement as
-their declaration. In fact, the only built-in way to initialise a qubit is
-with the special statement `reset`, which sets the qubit to the 0 computational
-basis state:
+It is important to emphasize at this point that qubits cannot be initialised
+in the same statement as their declaration. In fact, the only built-in way
+to initialise a qubit is with the special statement `reset`, which sets the
+qubit to the 0 computational basis state:
 
     qubit q;
     reset q;
