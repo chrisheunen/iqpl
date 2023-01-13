@@ -315,13 +315,22 @@ The output bits are $a=0$ and $b=0$, showing that $f$ was indeed balanced.
 
 ### Versions
 
-OpenQASM is a standard that has been defined in three different versions. You can declare which version your code is adhering to by having the following first line in your code:
+OpenQASM is a standard that has been defined in three different versions. You
+can declare which version your code is adhering to by having the following
+first line in your code:
 
-    OPENQASM 2.0;
+    OPENQASM 3.0;
 
-OpenQASM 1.0 and 2.0 were mainly developed by IBM. For OpenQASM 2.0 there are several compilers that input OpenQASM code and output a quantum circuit, not least of which the [Qiskit](#qiskit) suite, which we will discuss next.
+OpenQASM 1.0 and 2.0 were mainly developed by IBM. For OpenQASM 2.0 there
+are several compilers that input OpenQASM code and output a quantum circuit,
+not least of which the [Qiskit](#qiskit) suite, which we will discuss next.
 
-OpenQASM 3.0 has been defined and in beta since 2020, and is undergoing consultation by a wider consortium of stakeholders before becoming a finalised standard. As of the moment of writing this, no compilers accept OpenQASM 3.0 code. We stick with OpenQASM 2.0 in this document, so you can actually run it.
+OpenQASM 3.0 has been defined and in beta since 2020, and is undergoing
+consultation by a wider consortium of stakeholders before becoming a finalised
+standard. As of the moment of writing this, support for OpenQASM 3.0 has not
+been added to any of the major compilers. Temporary support is provided to
+import OpenQASM 3.0 strings into Qiskit is provided by the Python package
+[`qiskit-qasm3-import`](https://pypi.org/project/qiskit-qasm3-import/).
 
 
 ---
