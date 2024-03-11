@@ -76,7 +76,7 @@ To execute a Q# program takes some syntax. Here is a full implementation of the 
         open Microsoft.Quantum.Intrinsic;
         open Microsoft.Quantum.Measurement;
 
-        operation DeutschJozsa(n:Int, oracle:((Qubit[], Qubit)=>Unit)) : Boolean {
+        operation DeutschJozsa(n:Int, oracle:((Qubit[], Qubit)=>Unit)) : Bool {
           mutable isFunctionConstant = true;
           use (qn, q2) = (Qubit[n], Qubit());
           X(q2);

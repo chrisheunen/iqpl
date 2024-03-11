@@ -137,7 +137,7 @@ implementation of the Deutsch-Jozsa algorithm, using the operation
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Measurement;
 
-    operation DeutschJozsa(n:Int, oracle:((Qubit[], Qubit)=&gt;Unit)) : Boolean {
+    operation DeutschJozsa(n:Int, oracle:((Qubit[], Qubit)=&gt;Unit)) : Bool {
       mutable isFunctionConstant = true;
       use (qn, q2) = (Qubit[n], Qubit());
       X(q2);
